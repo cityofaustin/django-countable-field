@@ -26,10 +26,10 @@ class CountableTextInputWidget(widgets.TextInput):
             final_attrs['data-count'] = 'words'
 
         if VERSION[:2] >= (1, 11):
-            output = super(CountableTextWidget, self).render(
+            output = super(CountableTextInputWidget, self).render(
                 name, value, final_attrs, **kwargs)
         else:
-            output = super(CountableTextWidget, self).render(
+            output = super(CountableTextInputWidget, self).render(
                 name, value, final_attrs)
         output += self.get_word_count_template(final_attrs)
         return mark_safe(output)
