@@ -1,54 +1,57 @@
 /**
  * Control-specific JavaScript for countable-field
  * @author   Andrea Robertson (<https://github.com/RoboAndie>)
- * @version  1.3
+ * @version  1.4
  * @license  MIT
  * @see      <https://github.com/RoboAndie/django-countable-field>
  */
 (function() {
-    function CountableField(textarea) {
-        var countDisplay = document.getElementById(textarea.id + "_counter");
-        var allowedTypes = ["words", "paragraphs", "characters", "sentences", "all"];
-        var countDown = false;
-        var minCount, maxCount, countType;
-        if (textarea != null && countDisplay != null) {
-            minCount = textarea.getAttribute("data-min-count");
-            maxCount = textarea.getAttribute("data-max-count");
-            countType = textarea.getAttribute("data-count");
-            if (textarea.getAttribute("data-count-direction") === "down"){
-                countDown = true;
-                if (!maxCount > 0)
-                    maxCount = 0;
-            }
+  function CountableField(textarea) {
+    var countDisplay = document.getElementById(textarea.id + "_counter");
+    var allowedTypes = [
+      "words",
+      "paragraphs",
+      "characters",
+      "sentences",
+      "all"
+    ];
+    var countDown = false;
+    var minCount, maxCount, countType;
+    if (textarea != null && countDisplay != null) {
+      minCount = textarea.getAttribute("data-min-count");
+      maxCount = textarea.getAttribute("data-max-count");
+      countType = textarea.getAttribute("data-count");
+      if (textarea.getAttribute("data-count-direction") === "down") {
+        countDown = true;
+        if (!maxCount > 0) maxCount = 0;
+      }
 
-            if (!countType || allowedTypes.indexOf(countType) < 0)
-                countType = "words";
-            else if (countType === "characters")
-                countType = "all"; // all includes spaces, but characters does not
+      if (!countType || allowedTypes.indexOf(countType) < 0)
+        countType = "words";
+      else if (countType === "characters") countType = "all"; // all includes spaces, but characters does not
 
-            Countable.on(textarea, updateFieldWordCount);
-        }
-
-        function updateFieldWordCount(counter) {
-            var count;
-            if (countDown)
-                count = maxCount - counter[countType];
-            else
-                count = counter[countType];
-            countDisplay.getElementsByClassName("text-count-current")[0].innerHTML = count;
-            if (minCount && counter[countType] < minCount)
-                countDisplay.className = "text-count text-is-under-min";
-            else if (maxCount && counter[countType] > maxCount)
-                countDisplay.className = "text-count text-is-over-max";
-            else
-                countDisplay.className = "text-count";
-        }
+      Countable.on(textarea, updateFieldWordCount);
     }
 
-    document.addEventListener('DOMContentLoaded', function(e) {
-        ;[].forEach.call(document.querySelectorAll('[data-count]'), CountableField)
-    })
-})()
+    function updateFieldWordCount(counter) {
+      var count;
+      if (countDown) count = maxCount - counter[countType];
+      else count = counter[countType];
+      countDisplay.getElementsByClassName(
+        "text-count-current"
+      )[0].innerHTML = count;
+      if (minCount && counter[countType] < minCount)
+        countDisplay.className = "text-count text-is-under-min";
+      else if (maxCount && counter[countType] > maxCount)
+        countDisplay.className = "text-count text-is-over-max";
+      else countDisplay.className = "text-count";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function(e) {
+    [].forEach.call(document.querySelectorAll("[data-count]"), CountableField);
+  });
+})();
 
 /**
  * Countable is a script to allow for live paragraph-, word- and character-
@@ -64,9 +67,7 @@
  * Note: For the purpose of this internal documentation, arguments of the type
  * {Nodes} are to be interpreted as either {NodeList} or {Element}.
  */
-
-;(function (global) {
-
+(function(global) {
   /**
    * @private
    *
@@ -74,8 +75,8 @@
    * functionality bound to them.
    */
 
-  let liveElements = []
-  const each = Array.prototype.forEach
+  let liveElements = [];
+  const each = Array.prototype.forEach;
 
   /**
    * `ucs2decode` function from the punycode.js library.
@@ -94,36 +95,35 @@
    * @return  {Array}   The new array of code points.
    */
 
-  function decode (string) {
-    const output = []
-  	let counter = 0
-  	const length = string.length
+  function decode(string) {
+    const output = [];
+    let counter = 0;
+    const length = string.length;
 
-  	while (counter < length) {
-  		const value = string.charCodeAt(counter++)
+    while (counter < length) {
+      const value = string.charCodeAt(counter++);
 
-  		if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
+      if (value >= 0xd800 && value <= 0xdbff && counter < length) {
+        // It's a high surrogate, and there is a next character.
 
-  			// It's a high surrogate, and there is a next character.
+        const extra = string.charCodeAt(counter++);
 
-  			const extra = string.charCodeAt(counter++)
+        if ((extra & 0xfc00) == 0xdc00) {
+          // Low surrogate.
+          output.push(((value & 0x3ff) << 10) + (extra & 0x3ff) + 0x10000);
+        } else {
+          // It's an unmatched surrogate; only append this code unit, in case the
+          // next code unit is the high surrogate of a surrogate pair.
 
-  			if ((extra & 0xFC00) == 0xDC00) { // Low surrogate.
-  				output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000)
-  			} else {
+          output.push(value);
+          counter--;
+        }
+      } else {
+        output.push(value);
+      }
+    }
 
-  				// It's an unmatched surrogate; only append this code unit, in case the
-  				// next code unit is the high surrogate of a surrogate pair.
-
-  				output.push(value)
-  				counter--
-  			}
-  		} else {
-  			output.push(value)
-  		}
-  	}
-
-  	return output
+    return output;
   }
 
   /**
@@ -134,22 +134,27 @@
    * @private
    *
    * @param   {Nodes|String}  targets   A (collection of) element(s) or a single
-	 *                                    string to validate.
+   *                                    string to validate.
    *
    * @param   {Function}      callback  The callback function to validate.
    *
    * @return  {Boolean}       Returns whether all arguments are vaild.
    */
 
-  function validateArguments (targets, callback) {
-    const nodes = Object.prototype.toString.call(targets)
-    const targetsValid = typeof targets === 'string' || ((nodes === '[object NodeList]' || nodes === '[object HTMLCollection]') || targets.nodeType === 1)
-    const callbackValid = typeof callback === 'function'
+  function validateArguments(targets, callback) {
+    const nodes = Object.prototype.toString.call(targets);
+    const targetsValid =
+      typeof targets === "string" ||
+      (nodes === "[object NodeList]" ||
+        nodes === "[object HTMLCollection]" ||
+        targets.nodeType === 1);
+    const callbackValid = typeof callback === "function";
 
-    if (!targetsValid) console.error('Countable: Not a valid target')
-    if (!callbackValid) console.error('Countable: Not a valid callback function')
+    if (!targetsValid) console.error("Countable: Not a valid target");
+    if (!callbackValid)
+      console.error("Countable: Not a valid callback function");
 
-    return targetsValid && callbackValid
+    return targetsValid && callbackValid;
   }
 
   /**
@@ -164,12 +169,18 @@
    *
    * @return  {Object}       The object containing the number of paragraphs,
    *                         sentences, words, characters and characters
-	 *                         plus spaces.
+   *                         plus spaces.
    */
 
-  function count (target, options) {
-    let original = '' + (typeof target === 'string' ? target : ('value' in target ? target.value : target.textContent))
-    options = options || {}
+  function count(target, options) {
+    let original =
+      "" +
+      (typeof target === "string"
+        ? target
+        : "value" in target
+        ? target.value
+        : target.textContent);
+    options = options || {};
 
     /**
      * The initial implementation to allow for HTML tags stripping was created
@@ -179,15 +190,15 @@
      * @see <http://goo.gl/gFQQh>
      */
 
-    if (options.stripTags) original = original.replace(/<\/?[a-z][^>]*>/gi, '')
+    if (options.stripTags) original = original.replace(/<\/?[a-z][^>]*>/gi, "");
 
     if (options.ignore) {
-        each.call(options.ignore, function (i) {
-            original = original.replace(i, '')
-        })
+      each.call(options.ignore, function(i) {
+        original = original.replace(i, "");
+      });
     }
 
-    const trimmed = original.trim()
+    const trimmed = original.trim();
 
     /**
      * Most of the performance improvements are based on the works of @epmatsw.
@@ -196,12 +207,17 @@
      */
 
     return {
-      paragraphs: trimmed ? (trimmed.match(options.hardReturns ? /\n{2,}/g : /\n+/g) || []).length + 1 : 0,
+      paragraphs: trimmed
+        ? (trimmed.match(options.hardReturns ? /\n{2,}/g : /\n+/g) || [])
+            .length + 1
+        : 0,
       sentences: trimmed ? (trimmed.match(/[.?!…]+./g) || []).length + 1 : 0,
-      words: trimmed ? (trimmed.replace(/['";:,.?¿\-!¡]+/g, '').match(/\S+/g) || []).length : 0,
-      characters: trimmed ? decode(trimmed.replace(/\s/g, '')).length : 0,
+      words: trimmed
+        ? (trimmed.replace(/['";:,.?¿\-!¡]+/g, "").match(/\S+/g) || []).length
+        : 0,
+      characters: trimmed ? decode(trimmed.replace(/\s/g, "")).length : 0,
       all: decode(original).length
-    }
+    };
   }
 
   /**
@@ -222,7 +238,6 @@
    */
 
   const Countable = {
-
     /**
      * The `on` method binds the counting handler to all given elements. The
      * event is either `oninput` or `onkeydown`, based on the capabilities of
@@ -243,26 +258,26 @@
      * @return  {Object}    Returns the Countable object to allow for chaining.
      */
 
-    on: function (elements, callback, options) {
-      if (!validateArguments(elements, callback)) return
+    on: function(elements, callback, options) {
+      if (!validateArguments(elements, callback)) return;
 
       if (!Array.isArray(elements)) {
-          elements = [ elements ]
+        elements = [elements];
       }
 
-      each.call(elements, function (e) {
-          const handler = function () {
-            callback.call(e, count(e, options))
-          }
+      each.call(elements, function(e) {
+        const handler = function() {
+          callback.call(e, count(e, options));
+        };
 
-          liveElements.push({ element: e, handler: handler })
+        liveElements.push({ element: e, handler: handler });
 
-          handler()
+        handler();
 
-          e.addEventListener('input', handler)
-      })
+        e.addEventListener("input", handler);
+      });
 
-      return this
+      return this;
     },
 
     /**
@@ -275,24 +290,26 @@
      * @return  {Object}  Returns the Countable object to allow for chaining.
      */
 
-    off: function (elements) {
-      if (!validateArguments(elements, function () {})) return
+    off: function(elements) {
+      if (!validateArguments(elements, function() {})) return;
 
       if (!Array.isArray(elements)) {
-          elements = [ elements ]
+        elements = [elements];
       }
 
-      liveElements.filter(function (e) {
-          return elements.indexOf(e.element) !== -1
-      }).forEach(function (e) {
-          e.element.removeEventListener('input', e.handler)
-      })
+      liveElements
+        .filter(function(e) {
+          return elements.indexOf(e.element) !== -1;
+        })
+        .forEach(function(e) {
+          e.element.removeEventListener("input", e.handler);
+        });
 
-      liveElements = liveElements.filter(function (e) {
-          return elements.indexOf(e.element) === -1
-      })
+      liveElements = liveElements.filter(function(e) {
+        return elements.indexOf(e.element) === -1;
+      });
 
-      return this
+      return this;
     },
 
     /**
@@ -303,9 +320,9 @@
      *
      * @param   {Function}      callback   The callback to fire whenever the
      *                                     element's value changes. The callback
-		 *                                     is called with the relevant element
-		 *                                     bound to `this` and the counted values
-		 *                                     as the single parameter.
+     *                                     is called with the relevant element
+     *                                     bound to `this` and the counted values
+     *                                     as the single parameter.
      *
      * @param   {Object}        [options]  An object to modify Countable's
      *                                     behaviour.
@@ -313,18 +330,18 @@
      * @return  {Object}    Returns the Countable object to allow for chaining.
      */
 
-    count: function (targets, callback, options) {
-      if (!validateArguments(targets, callback)) return
+    count: function(targets, callback, options) {
+      if (!validateArguments(targets, callback)) return;
 
       if (!Array.isArray(targets)) {
-          targets = [ targets ]
+        targets = [targets];
       }
 
-      each.call(targets, function (e) {
-          callback.call(e, count(e, options))
-      })
+      each.call(targets, function(e) {
+        callback.call(e, count(e, options));
+      });
 
-      return this
+      return this;
     },
 
     /**
@@ -338,28 +355,31 @@
      *                     functionality is bound to all given elements.
      */
 
-    enabled: function (elements) {
+    enabled: function(elements) {
       if (elements.length === undefined) {
-        elements = [ elements ]
+        elements = [elements];
       }
 
-      return liveElements.filter(function (e) {
-          return elements.indexOf(e.element) !== -1
-      }).length === elements.length
+      return (
+        liveElements.filter(function(e) {
+          return elements.indexOf(e.element) !== -1;
+        }).length === elements.length
+      );
     }
-
-  }
+  };
 
   /**
    * Expose Countable depending on the module system used across the
    * application. (Node / CommonJS, AMD, global)
    */
 
-  if (typeof exports === 'object') {
-    module.exports = Countable
-  } else if (typeof define === 'function' && define.amd) {
-    define(function () { return Countable })
+  if (typeof exports === "object") {
+    module.exports = Countable;
+  } else if (typeof define === "function" && define.amd) {
+    define(function() {
+      return Countable;
+    });
   } else {
-    global.Countable = Countable
+    global.Countable = Countable;
   }
-}(this));
+})(this);

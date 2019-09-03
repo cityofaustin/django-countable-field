@@ -8,16 +8,16 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
-    name='django-countable-field',
-    version='1.3',
+    name='coa-django-countable-field',
+    version='1.4',
     packages=find_packages(),
     include_package_data=True,
     license='MIT License',
     description='A simple Django form field widget to display a text field with the current word count.',
     long_description=README,
-    url='https://github.com/RoboAndie/django-countable-field',
-    author='Andrea Robertson',
-    author_email='roboandie@gmail.com',
+    url='https://github.com/cityofaustin/django-countable-field',
+    author='Eric SHerman',
+    author_email='ericandrewsherman@gmail.com',
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
