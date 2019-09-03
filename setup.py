@@ -9,14 +9,14 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='coa-django-countable-field',
-    version='1.4',
+    version='1.5',
     packages=find_packages(),
     include_package_data=True,
     license='MIT License',
     description='A simple Django form field widget to display a text field with the current word count.',
     long_description=README,
     url='https://github.com/cityofaustin/django-countable-field',
-    author='Eric SHerman',
+    author='Eric Sherman',
     author_email='ericandrewsherman@gmail.com',
     classifiers=[
         'Environment :: Web Environment',
