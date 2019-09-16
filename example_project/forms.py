@@ -10,6 +10,8 @@ class CountableTestForm(forms.Form):
     word_count_field = forms.CharField(label="Word count")
     paragraph_count_field = forms.CharField(label="Paragraph count")
     sentence_count_field = forms.CharField(label="Sentence count")
+    f = forms.ComboField(
+        fields=[forms.CharField(max_length=20), forms.EmailField()])
 
     def __init__(self, *args, **kwargs):
         super(CountableTestForm, self).__init__(*args, **kwargs)
@@ -23,7 +25,8 @@ class CountableTestForm(forms.Form):
         self.fields['paragraph_count_field'].widget = CountableWidget(attrs={'data-min-count': 2,
                                                                              'data-count': 'paragraphs'})
         self.fields['paragraph_count_field'].help_text = "Must be at least 2 paragraphs"
-        self.fields['sentence_count_field'].widget = CountableWidget(attrs={'data-count': 'sentences'})
+        self.fields['sentence_count_field'].widget = CountableWidget(
+            attrs={'data-count': 'sentences'})
 
         self.helper = FormHelper()
         self.helper.wrapper_class = 'row'

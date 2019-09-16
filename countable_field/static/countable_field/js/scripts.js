@@ -48,8 +48,22 @@
     }
   }
 
-  document.addEventListener("DOMContentLoaded", function(e) {
-    [].forEach.call(document.querySelectorAll("[data-count]"), CountableField);
+  MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+  var observer = new MutationObserver(function(mutations) {
+    if (document.querySelectorAll("[data-count]")) {
+      [].forEach.call(
+        document.querySelectorAll("[data-count]"),
+        CountableField
+      );
+      console.log("a new element!");
+      observer.disconnect();
+    }
+  });
+  observer.observe(document, {
+    attributes: true,
+    childList: true,
+    characterData: true,
+    subtree: true
   });
 })();
 
