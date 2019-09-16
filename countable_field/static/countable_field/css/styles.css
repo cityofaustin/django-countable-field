@@ -1,7 +1,7 @@
 .text-count {
   float: left;
   font-size: 80%;
-  color: #818a91;
+  color: black;
 }
 .text-count.text-is-under-min,
 .text-count.text-is-over-max {
