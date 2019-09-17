@@ -59,7 +59,6 @@
           document.querySelectorAll("[data-count]"),
           CountableField
         );
-        observer.disconnect();
       } else if (mutation.type === "attributes") {
         console.log(
           "The " + mutation.attributeName + " attribute was modified."
