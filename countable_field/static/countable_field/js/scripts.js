@@ -47,23 +47,31 @@
       else countDisplay.className = "text-count";
     }
   }
-
   MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-  var observer = new MutationObserver(function(mutations) {
-    if (document.querySelectorAll("[data-count]")) {
-      [].forEach.call(
-        document.querySelectorAll("[data-count]"),
-        CountableField
-      );
-      console.log("a new element!");
-      observer.disconnect();
-    }
+
+  var observer = new MutationObserver(function(mutations, observer) {
+    mutations.forEach(function(mutation) {
+      console.log(mutation.addedNodes[0].nodeName);
+      if (mutation.addedNodes[0].nodeName === "TEXTAREA") {
+        console.log(mutation.addedNodes[0].nodeName);
+
+        [].forEach.call(
+          document.querySelectorAll("[data-count]"),
+          CountableField
+        );
+        observer.disconnect();
+      } else if (mutation.type === "attributes") {
+        console.log(
+          "The " + mutation.attributeName + " attribute was modified."
+        );
+      }
+    });
   });
+
   observer.observe(document, {
-    attributes: true,
     childList: true,
-    characterData: true,
-    subtree: true
+    subtree: true,
+    attributeFilter: ["data-count"]
   });
 })();
 
