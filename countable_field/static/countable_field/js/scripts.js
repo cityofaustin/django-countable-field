@@ -51,14 +51,9 @@
 
   var observer = new MutationObserver(function(mutations, observer) {
     mutations.forEach(function(mutation) {
-      console.log(mutation.addedNodes[0].nodeName);
-      if (mutation.addedNodes[0].nodeName === "TEXTAREA") {
+      if (mutation.addedNodes.length >= 1) {
         console.log(mutation.addedNodes[0].nodeName);
-
-        [].forEach.call(
-          document.querySelectorAll("[data-count]"),
-          CountableField
-        );
+        mutation.addedNodes.forEach.call(mutation.target, CountableField);
       } else if (mutation.type === "attributes") {
         console.log(
           "The " + mutation.attributeName + " attribute was modified."
