@@ -52,8 +52,10 @@
   var observer = new MutationObserver(function(mutations, observer) {
     mutations.forEach(function(mutation) {
       if (mutation.addedNodes.length >= 1) {
-        console.log(mutation.addedNodes[0].nodeName);
-        mutation.addedNodes.forEach.call(mutation.target, CountableField);
+        console.log(mutation);
+        for (let node of mutation.addedNodes) {
+          CountableField(node);
+        }
       } else if (mutation.type === "attributes") {
         console.log(
           "The " + mutation.attributeName + " attribute was modified."
