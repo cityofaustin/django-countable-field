@@ -54,7 +54,13 @@
       if (mutation.addedNodes.length >= 1) {
         console.log(mutation);
         for (let node of mutation.addedNodes) {
-          CountableField(node);
+          if (!node.hasChildNodes()) {
+            CountableField(node);
+          } else if (node.querySelectorAll("[data-count]")) {
+            for (let nodeChild of node.querySelectorAll("[data-count]")) {
+              CountableField(nodeChild);
+            }
+          }
         }
       } else if (mutation.type === "attributes") {
         console.log(
