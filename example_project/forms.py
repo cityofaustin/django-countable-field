@@ -3,6 +3,41 @@ from django import forms
 from crispy_forms.helper import FormHelper
 
 from countable_field.widgets import CountableWidget
+from django.forms import TextInput, MultiWidget
+
+
+class NestedFormWidget(MultiWidget):
+    def __init__(self, attrs=None):
+        _widgets = [
+            CountableWidget(attrs={'data-max-count': 160,
+                                   'data-count': 'characters',
+                                   'data-count-direction': 'down'}),
+            CountableWidget(attrs={'data-max-count': 160,
+                                   'data-count': 'characters',
+                                   'data-count-direction': 'down'})
+        ]
+
+        super(NestedFormWidget, self).__init__(_widgets, attrs)
+
+    def decompress(self, value):
+        return [value.field1, value.field2] if value else [None, None]
+
+
+class NestedForm(forms.MultiValueField):
+    widget = NestedFormWidget
+
+    def __init__(self, *args, **kwargs):
+        list_fields = [
+            forms.CharField(label="A nested field"),
+            forms.CharField(label="Another nested field")
+        ]
+        super(NestedForm, self).__init__(
+            fields=list_fields,
+            require_all_fields=False, **kwargs
+        )
+
+    def compress(self, values):
+        return values
 
 
 class CountableTestForm(forms.Form):
@@ -10,8 +45,9 @@ class CountableTestForm(forms.Form):
     word_count_field = forms.CharField(label="Word count")
     paragraph_count_field = forms.CharField(label="Paragraph count")
     sentence_count_field = forms.CharField(label="Sentence count")
-    f = forms.ComboField(
-        fields=[forms.CharField(max_length=20), forms.EmailField()])
+    nested_form = NestedForm()
+    # nested_form = forms.CharField(
+    #     label="Nested Fields", widget=NestedFormWidget())
 
     def __init__(self, *args, **kwargs):
         super(CountableTestForm, self).__init__(*args, **kwargs)

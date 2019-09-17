@@ -47,35 +47,40 @@
       else countDisplay.className = "text-count";
     }
   }
-  MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
-  var observer = new MutationObserver(function(mutations, observer) {
-    mutations.forEach(function(mutation) {
+  // subscriber function for mutation observer
+  function subscriber(mutations) {
+    mutations.forEach(mutation => {
+      // handle mutations here
       if (
-        mutation.addedNodes.length >= 1 &&
-        mutation.target.classList[0] !== "text-count-current"
+        mutation.target &&
+        [...mutation.addedNodes].length
+        // mutation.addedNodes.length >= 1 &&
+        // mutation.target.classList[0] !== "text-count-current"
       ) {
         for (let node of mutation.addedNodes) {
           if (!node.hasChildNodes()) {
             CountableField(node);
+            // console.log(mutation);
           } else if (node.querySelectorAll("[data-count]")) {
             for (let nodeChild of node.querySelectorAll("[data-count]")) {
               CountableField(nodeChild);
+              // console.log(nodeChild);
             }
           }
         }
-      } else if (mutation.type === "attributes") {
-        console.log(
-          "The " + mutation.attributeName + " attribute was modified."
-        );
       }
     });
-  });
+  }
+
+  // instantiating observer
+  const observer = new MutationObserver(subscriber);
+
+  MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
   observer.observe(document, {
     childList: true,
-    subtree: true,
-    attributeFilter: ["data-count"]
+    subtree: true
   });
 })();
 
