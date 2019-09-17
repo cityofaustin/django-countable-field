@@ -48,21 +48,25 @@
     }
   }
 
+  // i think this is for browser compatibility
+  MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
   // subscriber function for mutation observer
   function subscriber(mutations) {
     mutations.forEach(mutation => {
       // handle mutations here
       if (
         mutation.target &&
-        [...mutation.addedNodes].length
-        // mutation.addedNodes.length >= 1 &&
-        // mutation.target.classList[0] !== "text-count-current"
+        [...mutation.addedNodes].length &&
+        // dont track nodes being added, removed when count is updated
+        mutation.target.classList[0] !== "text-count-current"
       ) {
         for (let node of mutation.addedNodes) {
           if (!node.hasChildNodes()) {
             CountableField(node);
             // console.log(mutation);
-          } else if (node.querySelectorAll("[data-count]")) {
+          }
+          // case where there are mutliple added nodes
+          else if (node.querySelectorAll("[data-count]")) {
             for (let nodeChild of node.querySelectorAll("[data-count]")) {
               CountableField(nodeChild);
               // console.log(nodeChild);
@@ -73,10 +77,8 @@
     });
   }
 
-  // instantiating observer
+  // use observer instead of event listener
   const observer = new MutationObserver(subscriber);
-
-  MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
   observer.observe(document, {
     childList: true,
