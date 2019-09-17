@@ -1,7 +1,7 @@
 /**
  * Control-specific JavaScript for countable-field
  * @author   Andrea Robertson (<https://github.com/RoboAndie>)
- * @version  1.5
+ * @version  1.6
  * @license  MIT
  * @see      <https://github.com/RoboAndie/django-countable-field>
  */

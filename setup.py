@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='coa-django-countable-field',
-    version='1.5',
+    version='1.6',
     packages=find_packages(),
     include_package_data=True,
     license='MIT License',
