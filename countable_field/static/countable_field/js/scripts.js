@@ -52,7 +52,7 @@
   var observer = new MutationObserver(function(mutations, observer) {
     mutations.forEach(function(mutation) {
       if (
-        mutation.target.querySelector["data-count"] >= 1 &&
+        mutation.addedNodes.length >= 1 &&
         mutation.target.classList[0] !== "text-count-current"
       ) {
         for (let node of mutation.addedNodes) {
