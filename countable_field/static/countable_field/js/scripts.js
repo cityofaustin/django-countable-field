@@ -63,13 +63,11 @@
         for (let node of mutation.addedNodes) {
           if (!node.hasChildNodes()) {
             CountableField(node);
-            // console.log(mutation);
           }
           // case where there are mutliple added nodes
           else if (node.querySelectorAll("[data-count]")) {
             for (let nodeChild of node.querySelectorAll("[data-count]")) {
               CountableField(nodeChild);
-              // console.log(nodeChild);
             }
           }
         }
